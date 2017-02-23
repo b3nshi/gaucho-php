@@ -31,7 +31,13 @@ class Gaucho extends Routes
   }
 
   public function mount($basePath, $routes) {
-    $this->routes[$basePath] = $routes;
+    if (!empty($basePath) && ($basePath !== '/')) {
+      if ($basePath[0] !== '/') {
+        # Add slash at the beginning
+        $basePath = '/' . $basePath;
+      }
+      $this->mountPoints[$basePath] = $routes;
+    }
   }
 
   public function run() {
@@ -41,7 +47,13 @@ class Gaucho extends Routes
 
     # First I need to check if we have mount points
     if (count($this->mountPoints) > 0) {
-      # For now do nothing
+      foreach ($this->mountPoints as $key => $value) {
+        if (strpos($path, $key) === 0) {
+          $routes = $value[$this->request['type']];
+          $path = str_replace($key, '', $path);
+          break;
+        }
+      }
     }
 
     # Now I will control if the route is valid
@@ -54,6 +66,7 @@ class Gaucho extends Routes
         } else {
           $route['cb']();
         }
+        break;
       }
     }
   }

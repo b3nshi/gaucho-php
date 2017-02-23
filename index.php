@@ -14,4 +14,12 @@ $gaucho->get('/segundo', function () {
   echo 'Second method without params';
 });
 
+
+# Create group of routes and then mount them under a path
+$routes = new Gaucho\Routes('/optional');
+$routes->get('/cuarto', function () {
+  echo 'Cuarto under third';
+});
+$gaucho->mount('/tercero', $routes());
+
 $gaucho->run();
