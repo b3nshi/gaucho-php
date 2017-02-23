@@ -11,6 +11,11 @@ class Routes
     'MATCH' => []
   ];
 
+  protected $middlewares = [
+    'before' => [],
+    'after' => [],
+  ];
+
   private $basePath;
 
   function __construct($basePath = '')
@@ -29,7 +34,10 @@ class Routes
    */
   public function __invoke()
   {
-    return $this->routes;
+    return [
+      'routes' => $this->routes,
+      'middlewares' => $this->middlewares,
+    ];
   }
 
   private function createRoute($path, $callback)
@@ -92,5 +100,15 @@ class Routes
   public function match($path, $callback)
   {
     $this->method('MATCH', $path, $callback);
+  }
+
+  public function before($callback)
+  {
+    $this->middlewares['before'][] = $callback;
+  }
+
+  public function after($callback)
+  {
+    $this->middlewares['after'][] = $callback;
   }
 }

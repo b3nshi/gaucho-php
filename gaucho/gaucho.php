@@ -1,6 +1,9 @@
 <?php
 namespace Gaucho;
 
+# PUT and DELETE params
+# Response codes
+# Handle errors
 class Gaucho extends Routes
 {
   public $params = [
@@ -16,6 +19,10 @@ class Gaucho extends Routes
     'controller' => '',
     'mount' => '', # Mount point
     'query' => '', # Query string
+  ];
+
+  private $settings = [
+    'sanitize' => true, # True by default, but disabling the performance could be better
   ];
 
   public $mountPoints = [];
@@ -41,15 +48,35 @@ class Gaucho extends Routes
   }
 
   public function run() {
+    # Sanitize params if the option is true
+    if ($this->settings['sanitize']) {
+      $this->params = [
+        'get' => filter_input_array($_GET, FILTER_SANITIZE_STRING),
+        'post' => filter_input_array($_POST, FILTER_SANITIZE_STRING),
+        # If the server is nginx we need to define this function
+        'headers' => filter_input_array(getallheaders(), FILTER_SANITIZE_STRING),
+        'cookies' => filter_input_array($_COOKIE, FILTER_SANITIZE_STRING),
+      ];
+    }
+
     # This array could change if match with a mount point
     $routes = $this->routes[$this->request['type']];
     $path = $this->request['path'];
 
+    # Execute global middleware before
+    $this->execArrayFunctions($this->middlewares['before']);
+
     # First I need to check if we have mount points
+    $middlewares = [
+      'before' => [],
+      'after' => [],
+    ];
+
     if (count($this->mountPoints) > 0) {
       foreach ($this->mountPoints as $key => $value) {
         if (strpos($path, $key) === 0) {
-          $routes = $value[$this->request['type']];
+          $routes = $value['routes'][$this->request['type']];
+          $middlewares = $value['middlewares'];
           $path = str_replace($key, '', $path);
           break;
         }
@@ -59,6 +86,9 @@ class Gaucho extends Routes
     # Now I will control if the route is valid
     foreach ($routes as $route) {
       if (preg_match($route['regex'], $path)) {
+        # Execute middlewares before for specific route
+        $this->execArrayFunctions($middlewares['before']);
+
         $params = [];
         preg_match_all($route['regex'], $path, $params);
         if (count($params) > 1) {
@@ -66,8 +96,20 @@ class Gaucho extends Routes
         } else {
           $route['cb']();
         }
+
+        # Execute middlewares after for specific route
+        $this->execArrayFunctions($middlewares['after']);
         break;
       }
+    }
+
+    # Execute global middlewares after
+    $this->execArrayFunctions($this->middlewares['after']);
+  }
+
+  private function execArrayFunctions($functions) {
+    foreach ($functions as $func) {
+      $func();
     }
   }
 }

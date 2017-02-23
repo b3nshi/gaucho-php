@@ -6,6 +6,15 @@ include_once('gaucho/gaucho.php');
 
 $gaucho = new Gaucho\Gaucho();
 
+# Global middlewares
+$gaucho->before(function () {
+  echo 'Before <br/>';
+});
+
+$gaucho->after(function () {
+  echo 'After <br/>';
+});
+
 $gaucho->get('/probando/:param', function ($param) {
   echo 'HELLO, your param is: ' . $param;
 });
