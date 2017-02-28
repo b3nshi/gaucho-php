@@ -2,6 +2,7 @@
 
 # TODO: create the autoload function for classes
 include_once('gaucho/routes.php');
+include_once('gaucho/response.php');
 include_once('gaucho/gaucho.php');
 
 $gaucho = new Gaucho\Gaucho();
@@ -16,18 +17,18 @@ $gaucho->after(function () {
 });
 
 $gaucho->get('/probando/:param', function ($param) {
-  echo 'HELLO, your param is: ' . $param;
+  return new Gaucho\Response('HELLO my friend, your param is: ' . $param, 500);
 });
 
 $gaucho->get('/segundo', function () {
-  echo 'Second method without params';
+  return 'Second method without params';
 });
 
 
 # Create group of routes and then mount them under a path
 $routes = new Gaucho\Routes('/optional');
 $routes->get('/cuarto', function () {
-  echo 'Cuarto under third';
+  return 'Cuarto under third';
 });
 $gaucho->mount('/tercero', $routes());
 

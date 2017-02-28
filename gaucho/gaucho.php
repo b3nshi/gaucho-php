@@ -1,9 +1,10 @@
 <?php
 namespace Gaucho;
 
-# PUT and DELETE params
-# Response codes
-# Handle errors
+# TODO: PUT and DELETE params
+# TODO: Response codes
+# TODO: Handle errors
+# TODO: Error pages
 class Gaucho extends Routes
 {
   public $params = [
@@ -48,6 +49,9 @@ class Gaucho extends Routes
   }
 
   public function run() {
+    # Object to store the Response
+    $response;
+
     # Sanitize params if the option is true
     if ($this->settings['sanitize']) {
       $this->params = [
@@ -92,15 +96,22 @@ class Gaucho extends Routes
         $params = [];
         preg_match_all($route['regex'], $path, $params);
         if (count($params) > 1) {
-          call_user_func_array($route['cb'], $params[1]);
+          $response = call_user_func_array($route['cb'], $params[1]);
         } else {
-          $route['cb']();
+          $response = $route['cb']();
         }
 
         # Execute middlewares after for specific route
         $this->execArrayFunctions($middlewares['after']);
         break;
       }
+    }
+
+    # Call to the print function or just print the response
+    if ($response instanceof Response) {
+      $response->print();
+    } else if (!empty($response)) {
+      echo $response;
     }
 
     # Execute global middlewares after
