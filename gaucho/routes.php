@@ -16,6 +16,9 @@ class Routes
     'after' => [],
   ];
 
+  // Index by default, for empty path
+  protected $default = '/index';
+
   private $basePath;
 
   function __construct($basePath = '')
@@ -69,6 +72,17 @@ class Routes
     } else {
       # Return an empty array
       return [];
+    }
+  }
+
+  public function default($path = '/index')
+  {
+    if (!empty($path) && ($path !== '/')) {
+      if ($path[0] !== '/') {
+        # Add slash at the beginning
+        $path = '/' . $path;
+      }
+      $this->default = $path;
     }
   }
 

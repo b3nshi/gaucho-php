@@ -1,0 +1,12 @@
+{
+    "name": "fluentiq/lab-server",
+    "require": {
+        "firebase/php-jwt": "^4.0"
+    },
+    "authors": [
+        {
+            "name": "Benjamin Simon",
+            "email": "b3nshi@gmail.com"
+        }
+    ]
+}

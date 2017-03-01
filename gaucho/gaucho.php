@@ -89,7 +89,8 @@ class Gaucho extends Routes
 
     # Now I will control if the route is valid
     foreach ($routes as $route) {
-      if (preg_match($route['regex'], $path)) {
+      if ((($path !== '/') && preg_match($route['regex'], $path)) ||
+          (($path === '/') && ($route['path'] === $this->default))) {
         # Execute middlewares before for specific route
         $this->execArrayFunctions($middlewares['before']);
 
